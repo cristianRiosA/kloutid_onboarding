@@ -1,0 +1,53 @@
+@mixin no-select($events: none) {
+  -webkit-tap-highlight-color: rgba(0, 0, 0, 0);
+  -webkit-touch-callout: none;
+  -webkit-user-select: none;
+  -khtml-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  -webkit-user-drag: none;
+  -khtml-user-drag: none;
+  -moz-user-drag: none;
+  -o-user-drag: none;
+  user-drag: none;
+  user-select: none;
+  outline: none;
+  pointer-events: $events;
+}
+
+@mixin truncate() {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+@mixin box-shadow() {
+  -webkit-box-shadow: 0px 2px 10px rgba(0, 34, 91, 0.11);
+  -moz-box-shadow: 0px 2px 10px rgba(0, 34, 91, 0.11);
+  box-shadow: 0px 2px 10px rgba(0, 34, 91, 0.11);
+}
+
+@mixin remove-tap-highlight() {
+  -webkit-tap-highlight-color: rgba(0, 0, 0, 0);
+  -webkit-tap-highlight-color: transparent;
+}
+
+@mixin line-clamp($lines: 3) {
+  position: relative;
+  box-sizing: border-box;
+  display: -webkit-box !important;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: $lines;
+  text-overflow: -o-ellipsis-lastline;
+  overflow: hidden;
+}
+
+@mixin outline($borderRadius: 2px) {
+  &:focus-visible {
+    // Taken from antd
+    outline: 4px solid #8bc4ec;
+    outline-offset: 1px;
+    border-radius: $borderRadius;
+    transition: outline-offset 0s, outline 0s;
+  }
+}

@@ -1,3 +1,5 @@
+"use client";
+
 import React, { useState } from "react";
 import { TextField, Button, CircularProgress } from "@mui/material";
 import styles from "./Login.module.scss";

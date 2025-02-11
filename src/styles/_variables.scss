@@ -1,0 +1,24 @@
+$smartphones: "only screen and (max-width: 579px)";
+$smartphones_h: "only screen and (min-device-width : 414px) and (max-device-width : 768px) and (orientation : landscape)";
+$tablets: "only screen and (min-width: 768px) and (max-width: 959px)";
+$tablets_h: "only screen and (min-device-width : 768px) and (max-device-width : 1024px) and (orientation : landscape)";
+$desktop_higher: "only screen and (min-width: 1281px)";
+$desktop: "only screen and (min-width: 1025px) and (max-width: 1280px)";
+$iPadPro: "only screen and (min-device-width: 1024px) and (max-device-width: 1366px) and (-webkit-min-device-pixel-ratio: 2)";
+$iPadMini: "only screen and (min-device-width: 744px) and (max-device-width: 1024px) and (-webkit-min-device-pixel-ratio: 2) and (orientation: portrait)";
+
+$maxWidth: 1800px;
+
+// Color Palette
+$spanishBlue: #006cbb;
+$plainBlack: #000000;
+$plainWhite: #ffffff;
+$platinum: #dfe4e5;
+$venetianRed: #f7e9e8;
+$firebrick: #b3261e;
+$darkCharcoal: #303030;
+$alienArmpit: #8ce41d;
+$sonicSilver: #767373;
+$spanishBlue: #006cbb;
+$silverFoil: #abb2b2;
+$plainGray: #808080;
