@@ -44,12 +44,7 @@
   line-height: 32px;
   letter-spacing: 0.15px;
   color: transparent;
-  background: linear-gradient(
-    288deg,
-    #ff7113 23%,
-    #ff4b4b 47.26%,
-    #ff4b4b 69.11%
-  );
+  background: #00cce0;
   background-clip: text;
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
@@ -88,7 +83,7 @@
   padding-bottom: 24px;
 
   [class*="Mui-checked"] {
-    color: #ff6666;
+    color: #00cce0;
   }
 }
 
@@ -101,7 +96,7 @@
 
   a {
     text-decoration: none;
-    color: #0091ea;
+    color: #00cce0;
   }
 }
 
@@ -111,12 +106,12 @@
 }
 
 .registerButton {
-  background-color: #ff4d4d;
+  background-color: #00cce0;
   color: #fff;
   margin-bottom: 26px;
 
   &:hover {
-    background-color: #ff6666;
+    background-color: #44d3e0;
   }
 
   &:disabled {
@@ -188,6 +183,8 @@
 
   a {
     text-decoration: none;
-    color: #ff6666;
+    color: #00cce0;
+    font-weight: 700;
+    line-height: 143%;
   }
 }
