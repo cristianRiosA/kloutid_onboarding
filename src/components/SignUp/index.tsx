@@ -137,7 +137,7 @@ const SignUp: React.FC<SignUpProps> = ({ error, onSubmit, toggleForm }) => {
           <span>OR</span>
         </div>
 
-        <Button variant="outlined" fullWidth className={styles.googleButton}>
+        <Button variant="outlined" className={styles.googleButton}>
           <LazyImageRenderer
             src="icon/Access_with_Google_Icon.svg"
             width={24}

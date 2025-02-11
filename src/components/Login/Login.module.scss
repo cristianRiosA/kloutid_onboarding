@@ -120,15 +120,15 @@
 }
 
 .googleButton {
-  border: 1px solid #ccc;
-  color: #555;
-  padding: 8px 22px;
-  display: flex;
-  flex-direction: row;
-  align-items: center;
-  justify-content: center;
-  gap: 8px;
-  margin-bottom: 28px;
+  border: 1px solid #ccc !important;
+  color: #555 !important;
+  padding: 8px 22px !important;
+  display: flex !important;
+  flex-direction: row !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 8px !important;
+  margin-bottom: 28px !important;
 
   span {
     color: var(--action-disabled, rgba(0, 0, 0, 0.38));
