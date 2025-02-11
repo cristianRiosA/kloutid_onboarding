@@ -1,0 +1,171 @@
+.container {
+  text-align: center;
+  padding: 40px;
+  max-width: 854px;
+  margin: 0 auto;
+  font-family: "Roboto", sans-serif;
+}
+
+.heading {
+  font-size: 33px;
+  font-style: normal;
+  font-weight: 700;
+  line-height: 41.99px;
+  letter-spacing: 0.25px;
+  text-align: left;
+  margin: 0px;
+}
+
+.subheading {
+  color: #000;
+  font-size: 16px;
+  font-style: normal;
+  font-weight: 400;
+  line-height: 24px;
+  letter-spacing: 0.15px;
+  text-align: left;
+  margin: 0px;
+}
+
+.stepTracker {
+  display: flex;
+  margin-top: 63px;
+  margin-bottom: 53px;
+  flex-direction: row;
+  align-items: center;
+}
+
+.contentSteps {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.stepIcon {
+  display: flex;
+  height: 24px;
+  min-width: 24px;
+  min-height: 24px;
+  justify-content: center;
+  align-items: center;
+  border-radius: 100px;
+  background: #9da0ab;
+  transition: all 0.3s ease-in-out;
+
+  span {
+    color: white;
+    text-align: center;
+    font-size: 12px;
+    font-style: normal;
+    font-weight: 400;
+    line-height: 19.92px;
+    letter-spacing: 0.4px;
+  }
+}
+
+.active .stepIcon {
+  background: #ff4b4b;
+  font-weight: bold;
+  box-shadow: rgba(255, 255, 255, 1);
+}
+
+.active .stepText {
+  color: #000000de;
+  font-weight: 500;
+}
+
+.complete .stepIcon {
+  background: #00ba88;
+}
+
+.complete .stepText {
+  color: #000000de;
+  font-weight: 500;
+}
+
+/* 🔹 Paso futuro (por defecto) */
+.stepText {
+  color: var(--text-secondary, rgba(0, 0, 0, 0.6));
+  font-size: 14px;
+  font-style: normal;
+  font-weight: 500;
+  line-height: 21.98px;
+  letter-spacing: 0.1px;
+}
+
+/* --- Separadores entre pasos --- */
+.separator {
+  color: #bdbdbd;
+  margin-left: 8px;
+  margin-right: 8px;
+}
+
+/* --- Sección de contenido por paso --- */
+.contentSection {
+  margin-top: 30px;
+}
+
+.stepContent {
+  font-size: 16px;
+  font-weight: 400;
+  color: #333;
+}
+
+/* --- Botones --- */
+.buttonGroup {
+  display: flex;
+  justify-content: center;
+  gap: 10px;
+  margin-top: 20px;
+}
+
+.button {
+  padding: 12px 24px;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 16px;
+  font-weight: 600;
+  transition: all 0.2s ease-in-out;
+}
+
+.prevBtn {
+  display: flex;
+  padding: 6px 8px;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  text-transform: uppercase;
+  background: none;
+  color: #3e4165;
+  font-size: 14px;
+  font-style: normal;
+  font-weight: 500;
+  line-height: 24px;
+  letter-spacing: 0.4px;
+  text-transform: uppercase;
+}
+
+.nextBtn {
+  display: flex;
+  padding: 6px 16px;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  border-radius: var(--borderRadius, 4px);
+  background: var(--Primary-Default, #ff4b4b);
+  box-shadow: 0px 1px 5px 0px rgba(0, 0, 0, 0.12),
+    0px 2px 2px 0px rgba(0, 0, 0, 0.14), 0px 3px 1px -2px rgba(0, 0, 0, 0.2);
+  color: #fff;
+  font-size: 14px;
+  font-style: normal;
+  font-weight: 500;
+  line-height: 24px;
+  letter-spacing: 0.4px;
+  text-transform: uppercase;
+}
+
+.nextBtn:disabled {
+  background: #ccc;
+  cursor: not-allowed;
+}
