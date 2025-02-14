@@ -111,12 +111,11 @@ const Login: React.FC<LoginProps> = ({ error, onSubmit, toggleForm }) => {
         )}
 
         <Button type="button" className={styles.forgotPassword}>
-          Forgot your password?
+          <span> Forgot your password?</span>
         </Button>
         <Button
           type="submit"
           variant="contained"
-          fullWidth
           className={styles.loginButton}
           disabled={!isFormValid || isSubmitting}
         >

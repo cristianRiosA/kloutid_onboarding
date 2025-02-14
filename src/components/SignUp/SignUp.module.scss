@@ -86,7 +86,7 @@
 }
 
 .checkbox {
-  color: $plainBlack;
+  color: #fff;
 }
 
 .formControlLabel {
@@ -95,6 +95,12 @@
 
   [class*="Mui-checked"] {
     color: #00cce0;
+  }
+
+  [class*="MuiTypography-root"] {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
   }
 }
 
@@ -148,7 +154,7 @@
   display: flex;
   align-items: center;
   text-align: center;
-  margin: 20px 0;
+  margin: 26px 0;
   @include no-select();
 
   &::before,
@@ -175,7 +181,7 @@
   align-items: center !important;
   justify-content: center !important;
   gap: 8px !important;
-  margin-bottom: 36px !important;
+  margin-bottom: 28px !important;
   border-radius: 4px !important;
 
   span {

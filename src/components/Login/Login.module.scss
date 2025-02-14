@@ -30,7 +30,7 @@
   display: flex;
   flex-direction: column;
   gap: 26px;
-  padding-bottom: 24px;
+  padding-bottom: 18px;
 
   .input:nth-child(1),
   .input:nth-child(2) {
@@ -80,20 +80,24 @@
   align-items: center;
   justify-content: flex-start;
   padding: 8px 0px 8px 0px;
-  color: $darkTurquoise;
-  font-size: 12px;
-  font-weight: 700;
-  line-height: 12px;
-  letter-spacing: 0.15px;
-  font-style: normal;
-  text-transform: none;
   cursor: pointer;
+
+  span {
+    text-transform: none;
+    font-size: 12px;
+    font-weight: 700;
+    line-height: 12px;
+    letter-spacing: 0.15px;
+    font-style: normal;
+    color: $darkTurquoise;
+    margin: 0;
+  }
 }
 
 .loginButton {
   background-color: $darkTurquoise;
   color: #fff;
-  margin: 53px 0px 26px 0px;
+  margin: 54px 0px 26px 0px;
   border-radius: var(--borderRadius, 4px);
 
   &:hover {
@@ -122,7 +126,7 @@
   display: flex;
   align-items: center;
   text-align: center;
-  margin: 20px 0;
+  margin: 0 0 25px 0;
   @include no-select();
 
   &::before,
@@ -149,7 +153,7 @@
   align-items: center !important;
   justify-content: center !important;
   gap: 8px !important;
-  margin-bottom: 36px !important;
+  margin-bottom: 28px !important;
   border-radius: 4px !important;
 
   span {
