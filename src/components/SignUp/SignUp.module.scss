@@ -123,20 +123,20 @@
 }
 
 .registerButton {
-  background-color: $darkTurquoise;
-  color: #fff;
-  border-bottom: 26px;
-  border-radius: var(--borderRadius, 4px);
+  background-color: $darkTurquoise !important;
+  color: #fff !important;
+  border-bottom: 26px !important;
+  border-radius: var(--borderRadius, 4px) !important;
 
   &:hover {
-    background-color: #00e7ff;
+    background-color: #00e7ff !important;
   }
 
   &:disabled {
     background: var(
       --common-white_states-focusVisible,
       rgba(255, 255, 255, 0.3)
-    );
+    ) !important;
   }
 
   span {
