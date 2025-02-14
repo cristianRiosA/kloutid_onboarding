@@ -86,7 +86,7 @@
 }
 
 .checkbox {
-  color: #fff;
+  color: #fff !important;
 }
 
 .formControlLabel {
@@ -94,7 +94,7 @@
   padding-bottom: 24px;
 
   [class*="Mui-checked"] {
-    color: #00cce0;
+    color: #00cce0 !important;
   }
 
   [class*="MuiTypography-root"] {
