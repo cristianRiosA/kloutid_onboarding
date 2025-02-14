@@ -75,12 +75,12 @@
 }
 
 .forgotPassword {
-  width: fit-content;
-  display: inline-flex;
-  align-items: center;
-  justify-content: flex-start;
-  padding: 8px 0px 8px 0px;
-  cursor: pointer;
+  width: fit-content !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: flex-start !important;
+  padding: 8px 0px 8px 0px !important;
+  cursor: pointer !important;
 
   span {
     text-transform: none;
