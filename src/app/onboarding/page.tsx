@@ -2,8 +2,10 @@
 
 import React, { useState, useEffect } from "react";
 import clsx from "clsx";
-import styles from "./Onboarding.module.scss";
 import StepTracker from "@/components/StepTracker";
+import { LazyImageRenderer } from "lazy-image-renderer";
+
+import styles from "./Onboarding.module.scss";
 
 export default function OnboardingPage() {
   const [currentStep, setCurrentStep] = useState(1);
@@ -41,6 +43,13 @@ export default function OnboardingPage() {
 
   return (
     <div className={styles.container}>
+      <LazyImageRenderer
+        src="icon/Logo.svg"
+        alt="KloudID Logo"
+        width={200}
+        height={100}
+        className={styles.logo}
+      />
       <h2 className={styles.heading}>
         Leverage exclusive offers to connect with influencers who align with
         your brand.

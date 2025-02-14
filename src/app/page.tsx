@@ -16,7 +16,7 @@ export default function Home() {
           width={200}
           height={100}
         />
-        <h1 className={styles.title}>Welcome to KloudID</h1>
+        <h1 className={styles.title}>Welcome to KloutID</h1>
         <p className={styles.description}>
           We are excited to have you on board. Below you can start the process
           of setting up your account.

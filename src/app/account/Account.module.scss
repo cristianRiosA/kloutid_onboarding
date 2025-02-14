@@ -1,0 +1,37 @@
+@use "../../styles/mixins" as *;
+
+.container {
+  max-width: 487px;
+  margin: 0 auto;
+  padding: 125px 513px 124px;
+  display: flex;
+  flex-direction: column;
+  font-family: "Roboto", sans-serif;
+}
+
+.logo {
+  @include no-select();
+}
+
+.heading {
+  text-align: left;
+  margin: 0;
+  padding: 0 0 10px 0;
+  font-size: 34px;
+  font-style: normal;
+  font-weight: 700;
+  line-height: 41.99px;
+  letter-spacing: 0.25px;
+  @include no-select();
+}
+
+.subheading {
+  text-align: left;
+  padding-bottom: 43px;
+  font-size: 16px;
+  font-style: normal;
+  font-weight: 400;
+  line-height: 24px;
+  letter-spacing: 0.15px;
+  @include no-select();
+}

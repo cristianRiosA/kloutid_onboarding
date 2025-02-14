@@ -1,40 +1,14 @@
 @use "../../styles/variables" as *;
+@use "../../styles/mixins" as *;
 
 .container {
-  max-width: 483px;
-  margin: 0 auto;
-  padding: 26px 20px;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  font-family: "Roboto", sans-serif;
+  padding-top: 43px;
 }
 
 .form {
   display: flex;
   flex-direction: column;
   width: 100%;
-}
-
-.heading {
-  text-align: left;
-  margin: 0;
-  padding: 0 0 10px 0;
-  font-size: 34px;
-  font-style: normal;
-  font-weight: 700;
-  line-height: 41.99px;
-  letter-spacing: 0.25px;
-}
-
-.subheading {
-  text-align: left;
-  padding-bottom: 43px;
-  font-size: 16px;
-  font-style: normal;
-  font-weight: 400;
-  line-height: 24px;
-  letter-spacing: 0.15px;
 }
 
 .loginTitle {
@@ -44,11 +18,12 @@
   line-height: 32px;
   letter-spacing: 0.15px;
   color: transparent;
-  background: #00cce0;
+  background: $darkTurquoise;
   background-clip: text;
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   padding-bottom: 28px;
+  @include no-select();
 }
 
 .formContainer {
@@ -60,6 +35,37 @@
   .input:nth-child(1),
   .input:nth-child(2) {
     margin: 0;
+    border-radius: 4px;
+
+    [class*="MuiSvgIcon-root"] {
+      color: #fff;
+    }
+
+    [class*="MuiOutlinedInput-notchedOutl"] {
+      border: 1px solid var(--Grayscale-white, #fff);
+    }
+
+    [class*="MuiFormHelperText-root"] {
+      color: #000000;
+    }
+
+    [class*="MuiOutlinedInput-input"] {
+      color: var(--Grayscale-white, #fff);
+      font-size: 16px;
+      font-style: normal;
+      font-weight: 400;
+      line-height: 24px;
+      letter-spacing: 0.15px;
+    }
+
+    [class*="MuiInputLabel"] {
+      color: var(--Grayscale-white, #fff);
+      font-size: 16px;
+      font-style: normal;
+      font-weight: 400;
+      line-height: 24px;
+      letter-spacing: 0.15px;
+    }
   }
 }
 
@@ -68,28 +74,47 @@
   text-align: center;
 }
 
+.forgotPassword {
+  width: fit-content;
+  display: inline-flex;
+  align-items: center;
+  justify-content: flex-start;
+  padding: 8px 0px 8px 0px;
+  color: $darkTurquoise;
+  font-size: 12px;
+  font-weight: 700;
+  line-height: 12px;
+  letter-spacing: 0.15px;
+  font-style: normal;
+  text-transform: none;
+  cursor: pointer;
+}
+
 .loginButton {
-  background-color: #00cce0;
+  background-color: $darkTurquoise;
   color: #fff;
-  margin-bottom: 26px;
+  margin: 53px 0px 26px 0px;
+  border-radius: var(--borderRadius, 4px);
 
   &:hover {
-    background-color: #44d3e0;
+    background-color: #00e7ff;
   }
 
   &:disabled {
-    background: var(--action-disabledBackground, rgba(0, 0, 0, 0.12));
-    color: var(--action-disabled, rgba(0, 0, 0, 0.38));
+    background: var(
+      --common-white_states-focusVisible,
+      rgba(255, 255, 255, 0.3)
+    );
   }
 
   span {
-    color: inherit;
     font-size: 15px;
     font-weight: 500;
     font-style: normal;
     line-height: 26px;
     letter-spacing: 0.46px;
     text-transform: uppercase;
+    color: $charlestonGreen;
   }
 }
 
@@ -98,6 +123,7 @@
   align-items: center;
   text-align: center;
   margin: 20px 0;
+  @include no-select();
 
   &::before,
   &::after {
@@ -115,7 +141,7 @@
 }
 
 .googleButton {
-  border: 1px solid #ccc !important;
+  border: 1px solid #fff !important;
   color: #555 !important;
   padding: 8px 22px !important;
   display: flex !important;
@@ -123,16 +149,18 @@
   align-items: center !important;
   justify-content: center !important;
   gap: 8px !important;
-  margin-bottom: 28px !important;
+  margin-bottom: 36px !important;
+  border-radius: 4px !important;
 
   span {
-    color: var(--action-disabled, rgba(0, 0, 0, 0.38));
+    color: #fff;
     font-size: 15px;
     font-weight: 500;
     font-style: normal;
     line-height: 26px;
     letter-spacing: 0.46px;
     text-transform: uppercase;
+    @include no-select();
   }
 }
 
@@ -143,6 +171,7 @@
   font-weight: 400;
   line-height: 20.02px;
   letter-spacing: 0.17px;
+  user-select: none;
 
   a {
     text-decoration: none;

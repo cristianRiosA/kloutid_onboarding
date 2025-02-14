@@ -7,6 +7,7 @@
 }
 
 .heading {
+  color: #fff;
   font-size: 33px;
   font-style: normal;
   font-weight: 700;
@@ -17,7 +18,7 @@
 }
 
 .subheading {
-  color: #000;
+  color: #fff;
   font-size: 16px;
   font-style: normal;
   font-weight: 400;
@@ -53,25 +54,29 @@
   transition: all 0.3s ease-in-out;
 
   span {
-    color: white;
+    color: #fff;
     text-align: center;
     font-size: 12px;
     font-style: normal;
-    font-weight: 400;
+    font-weight: 700;
     line-height: 19.92px;
     letter-spacing: 0.4px;
   }
 }
 
 .active .stepIcon {
-  background: #00cce0;
+  background: #00e7ff;
   font-weight: bold;
   box-shadow: rgba(255, 255, 255, 1);
+
+  span {
+    color: rgba(0, 0, 0, 0.87);
+  }
 }
 
 .active .stepText {
-  color: #000000de;
-  font-weight: 500;
+  color: #fff;
+  font-weight: 700 !important;
 }
 
 .complete .stepIcon {
@@ -79,15 +84,15 @@
 }
 
 .complete .stepText {
-  color: #000000de;
-  font-weight: 500;
+  color: #fff;
+  font-weight: 700 !important;
 }
 
 .stepText {
-  color: var(--text-secondary, rgba(0, 0, 0, 0.6));
+  color: #fff;
   font-size: 14px;
   font-style: normal;
-  font-weight: 500;
+  font-weight: 400;
   line-height: 21.98px;
   letter-spacing: 0.1px;
 }
@@ -100,6 +105,10 @@
 
 .contentSection {
   margin-top: 30px;
+
+  p {
+    color: #fff;
+  }
 }
 
 .stepContent {
@@ -140,6 +149,7 @@
   line-height: 24px;
   letter-spacing: 0.4px;
   text-transform: uppercase;
+  background: revert;
 }
 
 .nextBtn {

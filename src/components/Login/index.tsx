@@ -1,7 +1,14 @@
 "use client";
 
 import React, { useState } from "react";
-import { TextField, Button, CircularProgress } from "@mui/material";
+import {
+  TextField,
+  Button,
+  IconButton,
+  InputAdornment,
+  CircularProgress,
+} from "@mui/material";
+import { Visibility, VisibilityOff } from "@mui/icons-material";
 import styles from "./Login.module.scss";
 import { LazyImageRenderer } from "lazy-image-renderer";
 
@@ -18,6 +25,13 @@ const Login: React.FC<LoginProps> = ({ error, onSubmit, toggleForm }) => {
     password: "",
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
+  const [emailError, setEmailError] = useState("");
+
+  const validateEmail = (email: string) => {
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    return emailRegex.test(email);
+  };
 
   const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = event.target;
@@ -25,6 +39,12 @@ const Login: React.FC<LoginProps> = ({ error, onSubmit, toggleForm }) => {
       ...prevValues,
       [name]: value,
     }));
+
+    if (name === "email") {
+      setEmailError(
+        validateEmail(value) ? "" : "Please enter a valid email address."
+      );
+    }
   };
 
   const handleSubmit = (event: React.FormEvent) => {
@@ -36,18 +56,14 @@ const Login: React.FC<LoginProps> = ({ error, onSubmit, toggleForm }) => {
   };
 
   const isFormValid =
-    formValues.email.trim() !== "" && formValues.password.trim() !== "";
+    formValues.email.trim() !== "" &&
+    formValues.password.trim() !== "" &&
+    emailError === "";
 
   return (
     <div className={styles.container}>
       <form onSubmit={handleSubmit} className={styles.form}>
-        <h4 className={styles.heading}>
-          Start growing your
-          <br /> brand connections for free
-        </h4>
-        <span className={styles.subheading}>No credit card required.</span>
-        <span className={styles.loginTitle}>Sign in</span>
-
+        <span className={styles.loginTitle}>Log in</span>
         <div className={styles.formContainer}>
           <TextField
             label="Email address"
@@ -59,18 +75,32 @@ const Login: React.FC<LoginProps> = ({ error, onSubmit, toggleForm }) => {
             className={styles.input}
             value={formValues.email}
             onChange={handleChange}
+            error={!!emailError}
+            helperText={emailError}
           />
 
           <TextField
             label="Password"
             name="password"
-            type="password"
+            type={showPassword ? "text" : "password"}
             required
             fullWidth
             margin="normal"
             className={styles.input}
             value={formValues.password}
             onChange={handleChange}
+            InputProps={{
+              endAdornment: (
+                <InputAdornment position="end">
+                  <IconButton
+                    onClick={() => setShowPassword((prev) => !prev)}
+                    edge="end"
+                  >
+                    {showPassword ? <VisibilityOff /> : <Visibility />}
+                  </IconButton>
+                </InputAdornment>
+              ),
+            }}
           />
         </div>
 
@@ -80,6 +110,9 @@ const Login: React.FC<LoginProps> = ({ error, onSubmit, toggleForm }) => {
           </span>
         )}
 
+        <Button type="button" className={styles.forgotPassword}>
+          Forgot your password?
+        </Button>
         <Button
           type="submit"
           variant="contained"
@@ -87,7 +120,7 @@ const Login: React.FC<LoginProps> = ({ error, onSubmit, toggleForm }) => {
           className={styles.loginButton}
           disabled={!isFormValid || isSubmitting}
         >
-          {isSubmitting ? <CircularProgress size={24} /> : <span>Login</span>}
+          {isSubmitting ? <CircularProgress size={24} /> : <span>log in</span>}
         </Button>
 
         <div className={styles.orText}>

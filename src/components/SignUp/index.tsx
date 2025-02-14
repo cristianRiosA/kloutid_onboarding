@@ -7,9 +7,11 @@ import {
   Checkbox,
   FormControlLabel,
   CircularProgress,
+  IconButton,
+  InputAdornment,
 } from "@mui/material";
+import { Visibility, VisibilityOff } from "@mui/icons-material";
 import { LazyImageRenderer } from "lazy-image-renderer";
-
 import styles from "./SignUp.module.scss";
 
 interface SignUpProps {
@@ -27,6 +29,15 @@ const SignUp: React.FC<SignUpProps> = ({ error, onSubmit, toggleForm }) => {
     terms: false,
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const [emailError, setEmailError] = useState("");
+  const [passwordError, setPasswordError] = useState("");
+
+  const validateEmail = (email: string) => {
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    return emailRegex.test(email);
+  };
 
   const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value, type, checked } = event.target;
@@ -34,6 +45,20 @@ const SignUp: React.FC<SignUpProps> = ({ error, onSubmit, toggleForm }) => {
       ...prevValues,
       [name]: type === "checkbox" ? checked : value,
     }));
+
+    if (name === "email") {
+      setEmailError(
+        validateEmail(value) ? "" : "Please enter a valid email address."
+      );
+    }
+
+    if (name === "password" || name === "confirmPassword") {
+      setPasswordError(
+        formValues.password !== value && name === "confirmPassword"
+          ? "Passwords do not match."
+          : ""
+      );
+    }
   };
 
   const handleSubmit = (event: React.FormEvent) => {
@@ -48,16 +73,14 @@ const SignUp: React.FC<SignUpProps> = ({ error, onSubmit, toggleForm }) => {
     formValues.email.trim() !== "" &&
     formValues.password.trim() !== "" &&
     formValues.confirmPassword.trim() !== "" &&
-    formValues.terms;
+    formValues.terms &&
+    emailError === "" &&
+    passwordError === "" &&
+    formValues.password === formValues.confirmPassword;
 
   return (
     <div className={styles.container}>
       <form onSubmit={handleSubmit} className={styles.form}>
-        <h4 className={styles.heading}>
-          Start growing your
-          <br /> brand connections for free
-        </h4>
-        <span className={styles.subheading}>No credit card required.</span>
         <span className={styles.signUpTitle}>Sign up</span>
         <div className={styles.formContainer}>
           <TextField
@@ -65,35 +88,53 @@ const SignUp: React.FC<SignUpProps> = ({ error, onSubmit, toggleForm }) => {
             name="email"
             type="email"
             required
-            fullWidth
-            margin="normal"
             className={styles.input}
             value={formValues.email}
             onChange={handleChange}
+            error={!!emailError}
+            helperText={emailError}
           />
 
           <TextField
             label="Password"
             name="password"
-            type="password"
+            type={showPassword ? "text" : "password"}
             required
-            fullWidth
-            margin="normal"
             className={styles.input}
             value={formValues.password}
             onChange={handleChange}
+            InputProps={{
+              endAdornment: (
+                <InputAdornment position="end">
+                  <IconButton onClick={() => setShowPassword((prev) => !prev)}>
+                    {showPassword ? <VisibilityOff /> : <Visibility />}
+                  </IconButton>
+                </InputAdornment>
+              ),
+            }}
           />
 
           <TextField
             label="Confirm password"
             name="confirmPassword"
-            type="password"
+            type={showConfirmPassword ? "text" : "password"}
             required
-            fullWidth
-            margin="normal"
             className={styles.input}
             value={formValues.confirmPassword}
             onChange={handleChange}
+            error={!!passwordError}
+            helperText={passwordError}
+            InputProps={{
+              endAdornment: (
+                <InputAdornment position="end">
+                  <IconButton
+                    onClick={() => setShowConfirmPassword((prev) => !prev)}
+                  >
+                    {showConfirmPassword ? <VisibilityOff /> : <Visibility />}
+                  </IconButton>
+                </InputAdornment>
+              ),
+            }}
           />
         </div>
         <FormControlLabel
