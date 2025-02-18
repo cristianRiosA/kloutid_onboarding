@@ -1,0 +1,19 @@
+@use "../../../styles/variables" as *;
+
+.informativeText {
+  display: flex;
+  flex-direction: row;
+  text-align: justify;
+  margin-top: 55px;
+  margin-bottom: 55px;
+}
+
+.logoInstallButton {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 258px;
+  height: 68px;
+  background: $plainWhite;
+  margin-bottom: 60px;
+}

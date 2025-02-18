@@ -1,0 +1,9 @@
+@use "../../../styles/variables" as *;
+
+.informativeText {
+  display: flex;
+  flex-direction: row;
+  text-align: justify;
+  margin-top: 55px;
+  margin-bottom: 55px;
+}

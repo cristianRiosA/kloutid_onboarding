@@ -1,0 +1,64 @@
+@use "../../styles/variables" as *;
+
+.modalPayment {
+  .continueModalButtom {
+    border-radius: 4px;
+    background: $aqua;
+    box-shadow: 0px 1px 5px 0px rgba(0, 0, 0, 0.12),
+      0px 2px 2px 0px rgba(0, 0, 0, 0.14), 0px 3px 1px -2px rgba(0, 0, 0, 0.2);
+
+    color: $plainBlack;
+    font-size: 14px;
+    font-style: normal;
+    font-weight: 500;
+    line-height: 24px;
+    letter-spacing: 0.4px;
+    text-transform: uppercase;
+  }
+
+  .cancelModalButtom {
+    color: $plainBlack;
+  }
+
+  [class*="MuiPaper-rounded"] {
+    display: flex;
+    padding: 20px;
+    flex-direction: column;
+    gap: 55px;
+
+    h2 {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 8px;
+
+      .titleModal {
+        color: $plainBlack;
+        font-size: 20px;
+        font-style: normal;
+        font-weight: 500;
+        line-height: 32px;
+        letter-spacing: 0.15px;
+      }
+
+      .subTitleModal {
+        color: rgba(0, 0, 0, 0.87);
+        font-size: 16px;
+        font-style: normal;
+        font-weight: 400;
+        line-height: 24px;
+        letter-spacing: 0.15px;
+      }
+    }
+  }
+
+  [class*="MuiDialogContent-root"] {
+    padding: 0 73px;
+    gap: 45px;
+  }
+
+  [class*="MuiDialogContent-root"] {
+    padding: 0 73px;
+    gap: 45px;
+  }
+}

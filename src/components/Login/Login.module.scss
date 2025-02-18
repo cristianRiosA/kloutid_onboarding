@@ -38,19 +38,19 @@
     border-radius: 4px;
 
     [class*="MuiSvgIcon-root"] {
-      color: #fff;
+      color: $plainWhite;
     }
 
     [class*="MuiOutlinedInput-notchedOutl"] {
-      border: 1px solid var(--Grayscale-white, #fff);
+      border: 1px solid var(--Grayscale-white, $plainWhite);
     }
 
     [class*="MuiFormHelperText-root"] {
-      color: #000000;
+      color: $plainBlack;
     }
 
     [class*="MuiOutlinedInput-input"] {
-      color: var(--Grayscale-white, #fff);
+      color: var(--Grayscale-white, $plainWhite);
       font-size: 16px;
       font-style: normal;
       font-weight: 400;
@@ -59,7 +59,7 @@
     }
 
     [class*="MuiInputLabel"] {
-      color: var(--Grayscale-white, #fff);
+      color: var(--Grayscale-white, $plainWhite);
       font-size: 16px;
       font-style: normal;
       font-weight: 400;
@@ -96,12 +96,12 @@
 
 .loginButton {
   background-color: $darkTurquoise !important;
-  color: #fff !important;
+  color: $plainWhite !important;
   margin: 54px 0px 26px 0px !important;
   border-radius: var(--borderRadius, 4px) !important;
 
   &:hover {
-    background-color: #00e7ff !important;
+    background-color: $aqua !important;
   }
 
   &:disabled {
@@ -179,7 +179,7 @@
 
   a {
     text-decoration: none;
-    color: #00cce0;
+    color: $darkTurquoise;
     font-weight: 700;
     line-height: 143%;
   }
