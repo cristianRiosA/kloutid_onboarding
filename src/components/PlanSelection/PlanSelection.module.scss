@@ -5,6 +5,7 @@
   align-items: flex-start;
   justify-content: space-between;
   gap: 95px;
+  width: 100%;
 
   .cardInfoButton {
     display: flex;
@@ -121,4 +122,10 @@
       }
     }
   }
+}
+
+.selectedPlan {
+  border: 4px solid $darkTurquoise !important;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2) !important;
+  transition: all 0.3s ease-in-out;
 }

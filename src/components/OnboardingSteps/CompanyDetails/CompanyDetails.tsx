@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import { TextField, MenuItem } from "@mui/material";
 
 import styles from "./CompanyDetails.module.scss";
@@ -13,6 +13,41 @@ const CompanyDetails: React.FC<CompanyDetailsProps> = ({
   formData,
   handleChange,
 }) => {
+  const [errors, setErrors] = useState({
+    companyName: "",
+    companyWebsite: "",
+    companySize: "",
+  });
+
+  const validateField = (name: string, value: string) => {
+    let errorMessage = "";
+
+    switch (name) {
+      case "companyName":
+        if (!value.trim()) errorMessage = "Company name is required.";
+        break;
+      case "companyWebsite":
+        if (!/^(https?:\/\/)?([\w-]+(\.[\w-]+)+\/?)\S*$/.test(value)) {
+          errorMessage = "Enter a valid URL (e.g., https://example.com).";
+        }
+        break;
+      case "companySize":
+        if (!value) errorMessage = "Select a company size.";
+        break;
+      default:
+        break;
+    }
+
+    setErrors((prevErrors) => ({
+      ...prevErrors,
+      [name]: errorMessage,
+    }));
+  };
+
+  const handleBlur = (e: React.FocusEvent<HTMLInputElement>) => {
+    validateField(e.target.name, e.target.value);
+  };
+
   return (
     <>
       <span className={styles.informativeText}>
@@ -24,6 +59,9 @@ const CompanyDetails: React.FC<CompanyDetailsProps> = ({
           name="companyName"
           value={formData.companyName}
           onChange={handleChange}
+          onBlur={handleBlur}
+          error={!!errors.companyName}
+          helperText={errors.companyName}
           required
         />
         <TextField
@@ -31,6 +69,9 @@ const CompanyDetails: React.FC<CompanyDetailsProps> = ({
           name="companyWebsite"
           value={formData.companyWebsite}
           onChange={handleChange}
+          onBlur={handleBlur}
+          error={!!errors.companyWebsite}
+          helperText={errors.companyWebsite}
           required
         />
         <TextField
@@ -39,6 +80,9 @@ const CompanyDetails: React.FC<CompanyDetailsProps> = ({
           name="companySize"
           value={formData.companySize}
           onChange={handleChange}
+          onBlur={handleBlur}
+          error={!!errors.companySize}
+          helperText={errors.companySize}
           required
           className={styles.companySize}
         >

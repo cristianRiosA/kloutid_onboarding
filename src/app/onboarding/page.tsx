@@ -1,10 +1,9 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import clsx from "clsx";
 import StepTracker from "@/components/StepTracker";
 import { LazyImageRenderer } from "lazy-image-renderer";
-import { Plan } from "@/interfaces/plan";
 import { FormData } from "@/interfaces/formData";
 import PaymentModal from "@/components/PaymentModal/PaymentModal";
 import PersonalDetails from "@/components/OnboardingSteps/PersonalDetails/PersonalDetails";
@@ -14,27 +13,12 @@ import PlanSelectionStep from "@/components/OnboardingSteps/PlanSelectionStep/Pl
 
 import styles from "./Onboarding.module.scss";
 
-const plans: Plan[] = [
-  {
-    id: "standard",
-    icon: "icon/Standar_plan_icon.svg",
-    title: "Standar plan",
-    price: "$199/mth",
-    additionalCosts: "+$2/verification",
-  },
-  {
-    id: "premium",
-    icon: "icon/Standar_plan_icon.svg",
-    title: "Premium Plan",
-    price: "$299/mth",
-    additionalCosts: "No additional costs",
-  },
-];
-
 export default function OnboardingPage() {
   const [currentStep, setCurrentStep] = useState(1);
   const [paymentModalOpen, setPaymentModalOpen] = useState(false);
-  const [isPaymentComplete, setIsPaymentComplete] = useState<boolean>(false);
+  const [isPaymentComplete, setIsPaymentComplete] = useState(false);
+  const [errors, setErrors] = useState<Record<string, string>>({});
+  const [isNextDisabled, setIsNextDisabled] = useState(true);
   const [formData, setFormData] = useState<FormData>({
     firstName: "",
     lastName: "",
@@ -44,28 +28,8 @@ export default function OnboardingPage() {
     companyWebsite: "",
     companySize: "",
     selectedPlan: "",
-    creditCards: Object.fromEntries(plans.map((plan) => [plan.id, null])),
+    creditCards: {},
   });
-
-  useEffect(() => {
-    if (typeof window !== "undefined") {
-      const savedFormData = sessionStorage.getItem("onboardingFormData");
-      if (savedFormData) {
-        setFormData(JSON.parse(savedFormData));
-      }
-    }
-  }, []);
-
-  useEffect(() => {
-    if (typeof window !== "undefined") {
-      sessionStorage.setItem("onboardingFormData", JSON.stringify(formData));
-    }
-  }, [formData]);
-
-  useEffect(() => {
-    setCurrentStep(1);
-    sessionStorage.removeItem("onboardingFormData");
-  }, []);
 
   const steps = [
     { text: "Tell us about yourself", icon: 1 },
@@ -74,11 +38,55 @@ export default function OnboardingPage() {
     { text: "Select your plan", icon: 4 },
   ];
 
+  const validateStep = useCallback((): boolean => {
+    const newErrors: Record<string, string> = {};
+
+    if (currentStep === 1) {
+      if (!formData.firstName.trim())
+        newErrors.firstName = "First name is required.";
+      if (!formData.lastName.trim())
+        newErrors.lastName = "Last name is required.";
+      if (!/^[\w-.]+@([\w-]+\.)+[\w-]{2,4}$/.test(formData.email))
+        newErrors.email = "Enter a valid email.";
+      if (!formData.phone || formData.phone.length < 10)
+        newErrors.phone = "Enter a valid phone number (min 10 digits).";
+    }
+
+    if (currentStep === 3) {
+      if (!formData.companyName.trim())
+        newErrors.companyName = "Company name is required.";
+      if (
+        !/^(https?:\/\/)?([\w-]+(\.[\w-]+)+\/?)\S*$/.test(
+          formData.companyWebsite
+        )
+      )
+        newErrors.companyWebsite = "Enter a valid company website.";
+      if (!formData.companySize)
+        newErrors.companySize = "Select a company size.";
+    }
+
+    if (currentStep === 4) {
+      if (!formData.selectedPlan)
+        newErrors.selectedPlan = "You must select a plan.";
+      if (!isPaymentComplete)
+        newErrors.payment = "You must complete the payment.";
+    }
+
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  }, [currentStep, formData, isPaymentComplete]);
+
+  useEffect(() => {
+    setIsNextDisabled(!validateStep());
+  }, [formData, isPaymentComplete, validateStep]);
+
   const handleNext = () => {
-    if (currentStep < steps.length) {
-      setCurrentStep(currentStep + 1);
-    } else {
-      handleSubmit();
+    if (validateStep()) {
+      if (currentStep < steps.length) {
+        setCurrentStep(currentStep + 1);
+      } else {
+        handleSubmit();
+      }
     }
   };
 
@@ -95,11 +103,39 @@ export default function OnboardingPage() {
     }));
   };
 
+  const handlePhoneChange = (value: string | undefined) => {
+    if (!value) {
+      setFormData((prevFormData) => ({
+        ...prevFormData,
+        phone: "",
+      }));
+      return;
+    }
+
+    const numericValue = value.replace(/\D/g, "");
+    const match = value.match(/^(\+\d{1,4})\s?/);
+    const countryCode = match ? match[1] : "";
+
+    const nationalNumber = numericValue.replace(
+      countryCode.replace(/\D/g, ""),
+      ""
+    );
+
+    const truncatedNationalNumber = nationalNumber.slice(0, 10);
+    const formattedPhone = countryCode + " " + truncatedNationalNumber;
+
+    setFormData((prevFormData) => ({
+      ...prevFormData,
+      phone: formattedPhone.trim(),
+    }));
+  };
+
   const handlePlanSelection = (planId: string) => {
     setFormData((prevFormData) => ({
       ...prevFormData,
       selectedPlan: planId,
     }));
+    setErrors((prevErrors) => ({ ...prevErrors, selectedPlan: "" }));
     setPaymentModalOpen(true);
   };
 
@@ -113,6 +149,7 @@ export default function OnboardingPage() {
       },
     }));
     setIsPaymentComplete(true);
+    setErrors((prevErrors) => ({ ...prevErrors, payment: "" }));
   };
 
   const handleSubmit = async () => {
@@ -125,7 +162,6 @@ export default function OnboardingPage() {
       });
       if (response.ok) {
         alert("Onboarding completed successfully!");
-        sessionStorage.removeItem("onboardingFormData");
         setFormData({
           firstName: "",
           lastName: "",
@@ -137,33 +173,10 @@ export default function OnboardingPage() {
           selectedPlan: "",
           creditCards: {},
         });
+        setCurrentStep(1);
       }
     } catch (error) {
       console.error("Error submitting form", error);
-    }
-  };
-
-  const renderStepContent = () => {
-    switch (currentStep) {
-      case 1:
-        return (
-          <PersonalDetails formData={formData} handleChange={handleChange} />
-        );
-      case 2:
-        return <ServiceConnection />;
-      case 3:
-        return (
-          <CompanyDetails formData={formData} handleChange={handleChange} />
-        );
-      case 4:
-        return (
-          <PlanSelectionStep
-            formData={formData}
-            handlePlanSelection={handlePlanSelection}
-          />
-        );
-      default:
-        return null;
     }
   };
 
@@ -171,7 +184,7 @@ export default function OnboardingPage() {
     <div className={styles.container}>
       <LazyImageRenderer
         src="icon/Logo.svg"
-        alt="KloudID Logo"
+        alt="Logo"
         width={200}
         height={100}
         className={styles.logo}
@@ -210,7 +223,28 @@ export default function OnboardingPage() {
         separatorClassName={styles.separator}
       />
 
-      <div className={styles.contentSection}>{renderStepContent()}</div>
+      <div className={styles.contentSection}>
+        {currentStep === 1 && (
+          <PersonalDetails
+            formData={formData}
+            handleChange={handleChange}
+            handlePhoneChange={handlePhoneChange}
+          />
+        )}
+        {currentStep === 2 && <ServiceConnection />}
+        {currentStep === 3 && (
+          <CompanyDetails formData={formData} handleChange={handleChange} />
+        )}
+        {currentStep === 4 && (
+          <PlanSelectionStep
+            formData={formData}
+            handlePlanSelection={handlePlanSelection}
+          />
+        )}
+        {errors.selectedPlan && (
+          <p className={styles.errorText}>{errors.selectedPlan}</p>
+        )}
+      </div>
 
       <div className={styles.buttonGroup}>
         {currentStep > 1 && (
@@ -224,7 +258,7 @@ export default function OnboardingPage() {
         <button
           className={clsx(styles.button, styles.nextBtn)}
           onClick={handleNext}
-          disabled={currentStep === steps.length && !isPaymentComplete}
+          disabled={isNextDisabled}
         >
           Continue
         </button>

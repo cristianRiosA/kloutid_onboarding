@@ -1,6 +1,6 @@
 "use client";
 
-import React from "react";
+import clsx from "clsx";
 import { Button } from "@mui/material";
 import { LazyImageRenderer } from "lazy-image-renderer";
 
@@ -42,7 +42,9 @@ const PlanSelection: React.FC<PlanSelectionProps> = ({
           <Button
             variant="contained"
             onClick={() => handlePlanSelection(plan.id)}
-            className={styles.planCard}
+            className={clsx(styles.planCard, {
+              [styles.selectedPlan]: formData.selectedPlan === plan.id,
+            })}
           >
             <div className={styles.planCardContent}>
               <LazyImageRenderer
