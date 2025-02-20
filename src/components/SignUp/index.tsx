@@ -9,19 +9,20 @@ import {
   CircularProgress,
   IconButton,
   InputAdornment,
+  Alert,
 } from "@mui/material";
 import { Visibility, VisibilityOff } from "@mui/icons-material";
 import { LazyImageRenderer } from "lazy-image-renderer";
 import styles from "./SignUp.module.scss";
+import { registerWithEmail } from "@/firebase/auth";
 
 interface SignUpProps {
   isLoading?: boolean;
   error?: boolean;
-  onSubmit?: (values: { email: string; password: string }) => void;
   toggleForm?: () => void;
 }
 
-const SignUp: React.FC<SignUpProps> = ({ error, onSubmit, toggleForm }) => {
+const SignUp: React.FC<SignUpProps> = ({ error, toggleForm }) => {
   const [formValues, setFormValues] = useState({
     email: "",
     password: "",
@@ -31,41 +32,38 @@ const SignUp: React.FC<SignUpProps> = ({ error, onSubmit, toggleForm }) => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
-  const [emailError, setEmailError] = useState("");
-  const [passwordError, setPasswordError] = useState("");
-
-  const validateEmail = (email: string) => {
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    return emailRegex.test(email);
-  };
+  const [authError, setAuthError] = useState<string | null>(null);
 
   const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value, type, checked } = event.target;
-    setFormValues((prevValues) => ({
-      ...prevValues,
+    setFormValues((prev) => ({
+      ...prev,
       [name]: type === "checkbox" ? checked : value,
     }));
-
-    if (name === "email") {
-      setEmailError(
-        validateEmail(value) ? "" : "Please enter a valid email address."
-      );
-    }
-
-    if (name === "password" || name === "confirmPassword") {
-      setPasswordError(
-        formValues.password !== value && name === "confirmPassword"
-          ? "Passwords do not match."
-          : ""
-      );
-    }
   };
 
-  const handleSubmit = (event: React.FormEvent) => {
+  const handleSubmit = async (event: React.FormEvent) => {
     event.preventDefault();
     setIsSubmitting(true);
-    if (onSubmit) {
-      onSubmit({ email: formValues.email, password: formValues.password });
+    setAuthError(null);
+
+    if (formValues.password !== formValues.confirmPassword) {
+      setAuthError("Passwords do not match.");
+      setIsSubmitting(false);
+      return;
+    }
+
+    try {
+      await registerWithEmail(formValues.email, formValues.password);
+      toggleForm?.();
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    } catch (error: any) {
+      setIsSubmitting(false);
+      setAuthError(
+        error.code === "auth/email-already-in-use"
+          ? "This email is already in use."
+          : "Failed to create account. Please try again."
+      );
     }
   };
 
@@ -73,15 +71,13 @@ const SignUp: React.FC<SignUpProps> = ({ error, onSubmit, toggleForm }) => {
     formValues.email.trim() !== "" &&
     formValues.password.trim() !== "" &&
     formValues.confirmPassword.trim() !== "" &&
-    formValues.terms &&
-    emailError === "" &&
-    passwordError === "" &&
-    formValues.password === formValues.confirmPassword;
+    formValues.terms;
 
   return (
     <div className={styles.container}>
       <form onSubmit={handleSubmit} className={styles.form}>
         <span className={styles.signUpTitle}>Sign up</span>
+
         <div className={styles.formContainer}>
           <TextField
             label="Email address"
@@ -91,8 +87,8 @@ const SignUp: React.FC<SignUpProps> = ({ error, onSubmit, toggleForm }) => {
             className={styles.input}
             value={formValues.email}
             onChange={handleChange}
-            error={!!emailError}
-            helperText={emailError}
+            autoComplete="email"
+            fullWidth
           />
 
           <TextField
@@ -103,14 +99,20 @@ const SignUp: React.FC<SignUpProps> = ({ error, onSubmit, toggleForm }) => {
             className={styles.input}
             value={formValues.password}
             onChange={handleChange}
-            InputProps={{
-              endAdornment: (
-                <InputAdornment position="end">
-                  <IconButton onClick={() => setShowPassword((prev) => !prev)}>
-                    {showPassword ? <VisibilityOff /> : <Visibility />}
-                  </IconButton>
-                </InputAdornment>
-              ),
+            autoComplete="new-password"
+            fullWidth
+            slotProps={{
+              input: {
+                endAdornment: (
+                  <InputAdornment position="end">
+                    <IconButton
+                      onClick={() => setShowPassword((prev) => !prev)}
+                    >
+                      {showPassword ? <VisibilityOff /> : <Visibility />}
+                    </IconButton>
+                  </InputAdornment>
+                ),
+              },
             }}
           />
 
@@ -122,21 +124,24 @@ const SignUp: React.FC<SignUpProps> = ({ error, onSubmit, toggleForm }) => {
             className={styles.input}
             value={formValues.confirmPassword}
             onChange={handleChange}
-            error={!!passwordError}
-            helperText={passwordError}
-            InputProps={{
-              endAdornment: (
-                <InputAdornment position="end">
-                  <IconButton
-                    onClick={() => setShowConfirmPassword((prev) => !prev)}
-                  >
-                    {showConfirmPassword ? <VisibilityOff /> : <Visibility />}
-                  </IconButton>
-                </InputAdornment>
-              ),
+            autoComplete="new-password"
+            fullWidth
+            slotProps={{
+              input: {
+                endAdornment: (
+                  <InputAdornment position="end">
+                    <IconButton
+                      onClick={() => setShowConfirmPassword((prev) => !prev)}
+                    >
+                      {showConfirmPassword ? <VisibilityOff /> : <Visibility />}
+                    </IconButton>
+                  </InputAdornment>
+                ),
+              },
             }}
           />
         </div>
+
         <FormControlLabel
           className={styles.formControlLabel}
           control={
@@ -154,10 +159,17 @@ const SignUp: React.FC<SignUpProps> = ({ error, onSubmit, toggleForm }) => {
             </span>
           }
         />
+
+        {authError && (
+          <Alert severity="error" className={styles.error}>
+            {authError}
+          </Alert>
+        )}
+
         {error && (
-          <span color="error" className={styles.error}>
+          <Alert severity="error" className={styles.error}>
             Something went wrong. Please try again.
-          </span>
+          </Alert>
         )}
 
         <Button
@@ -178,7 +190,11 @@ const SignUp: React.FC<SignUpProps> = ({ error, onSubmit, toggleForm }) => {
           <span>OR</span>
         </div>
 
-        <Button variant="outlined" className={styles.googleButton}>
+        <Button
+          variant="outlined"
+          className={styles.googleButton}
+          disabled={isSubmitting}
+        >
           <LazyImageRenderer
             src="icon/Access_with_Google_Icon.svg"
             width={24}

@@ -7,58 +7,61 @@ import {
   IconButton,
   InputAdornment,
   CircularProgress,
+  Alert,
 } from "@mui/material";
 import { Visibility, VisibilityOff } from "@mui/icons-material";
-import styles from "./Login.module.scss";
+import { loginWithEmail, loginWithGoogle } from "@/firebase/auth";
 import { LazyImageRenderer } from "lazy-image-renderer";
+import { useRouter } from "next/navigation";
+
+import styles from "./Login.module.scss";
 
 interface LoginProps {
   isLoading?: boolean;
   error?: boolean;
-  onSubmit?: (values: { email: string; password: string }) => void;
   toggleForm?: () => void;
 }
 
-const Login: React.FC<LoginProps> = ({ error, onSubmit, toggleForm }) => {
+const Login: React.FC<LoginProps> = ({ error, toggleForm }) => {
+  const router = useRouter();
   const [formValues, setFormValues] = useState({
     email: "",
     password: "",
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
-  const [emailError, setEmailError] = useState("");
-
-  const validateEmail = (email: string) => {
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    return emailRegex.test(email);
-  };
+  const [authError, setAuthError] = useState<string | null>(null);
 
   const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = event.target;
-    setFormValues((prevValues) => ({
-      ...prevValues,
-      [name]: value,
-    }));
-
-    if (name === "email") {
-      setEmailError(
-        validateEmail(value) ? "" : "Please enter a valid email address."
-      );
-    }
+    setFormValues((prev) => ({ ...prev, [name]: value }));
   };
 
-  const handleSubmit = (event: React.FormEvent) => {
+  const handleSubmit = async (event: React.FormEvent) => {
     event.preventDefault();
     setIsSubmitting(true);
-    if (onSubmit) {
-      onSubmit({ email: formValues.email, password: formValues.password });
+    setAuthError(null);
+
+    try {
+      await loginWithEmail(formValues.email, formValues.password);
+      router.push("/onboarding");
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    } catch (error: any) {
+      setIsSubmitting(false);
+
+      let errorMessage = "Failed to login. Please check your credentials.";
+      if (error.code === "auth/user-not-found") {
+        errorMessage = "No account found with this email.";
+      } else if (error.code === "auth/wrong-password") {
+        errorMessage = "Incorrect password. Try again.";
+      }
+
+      setAuthError(errorMessage);
     }
   };
 
   const isFormValid =
-    formValues.email.trim() !== "" &&
-    formValues.password.trim() !== "" &&
-    emailError === "";
+    formValues.email.trim() !== "" && formValues.password.trim() !== "";
 
   return (
     <div className={styles.container}>
@@ -75,8 +78,7 @@ const Login: React.FC<LoginProps> = ({ error, onSubmit, toggleForm }) => {
             className={styles.input}
             value={formValues.email}
             onChange={handleChange}
-            error={!!emailError}
-            helperText={emailError}
+            autoComplete="email"
           />
 
           <TextField
@@ -89,25 +91,33 @@ const Login: React.FC<LoginProps> = ({ error, onSubmit, toggleForm }) => {
             className={styles.input}
             value={formValues.password}
             onChange={handleChange}
-            InputProps={{
-              endAdornment: (
-                <InputAdornment position="end">
-                  <IconButton
-                    onClick={() => setShowPassword((prev) => !prev)}
-                    edge="end"
-                  >
-                    {showPassword ? <VisibilityOff /> : <Visibility />}
-                  </IconButton>
-                </InputAdornment>
-              ),
+            autoComplete="current-password"
+            slotProps={{
+              input: {
+                endAdornment: (
+                  <InputAdornment position="end">
+                    <IconButton
+                      onClick={() => setShowPassword((prev) => !prev)}
+                      edge="end"
+                    >
+                      {showPassword ? <VisibilityOff /> : <Visibility />}
+                    </IconButton>
+                  </InputAdornment>
+                ),
+              },
             }}
           />
         </div>
 
+        {authError && (
+          <Alert severity="error" className={styles.error}>
+            {authError}
+          </Alert>
+        )}
         {error && (
-          <span color="error" className={styles.error}>
+          <Alert severity="error" className={styles.error}>
             Invalid credentials. Please try again.
-          </span>
+          </Alert>
         )}
 
         <Button type="button" className={styles.forgotPassword}>
@@ -119,14 +129,19 @@ const Login: React.FC<LoginProps> = ({ error, onSubmit, toggleForm }) => {
           className={styles.loginButton}
           disabled={!isFormValid || isSubmitting}
         >
-          {isSubmitting ? <CircularProgress size={24} /> : <span>log in</span>}
+          {isSubmitting ? <CircularProgress size={24} /> : <span>Log in</span>}
         </Button>
 
         <div className={styles.orText}>
           <span>OR</span>
         </div>
 
-        <Button variant="outlined" className={styles.googleButton}>
+        <Button
+          variant="outlined"
+          className={styles.googleButton}
+          onClick={loginWithGoogle}
+          disabled={isSubmitting}
+        >
           <LazyImageRenderer
             src="icon/Access_with_Google_Icon.svg"
             width={24}

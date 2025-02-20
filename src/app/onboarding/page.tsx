@@ -15,6 +15,8 @@ import styles from "./Onboarding.module.scss";
 
 export default function OnboardingPage() {
   const [currentStep, setCurrentStep] = useState(1);
+  const [isShopifyInstalling, setIsShopifyInstalling] = useState(false);
+  const [isShopifyInstalled, setIsShopifyInstalled] = useState(false);
   const [paymentModalOpen, setPaymentModalOpen] = useState(false);
   const [isPaymentComplete, setIsPaymentComplete] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
@@ -80,12 +82,22 @@ export default function OnboardingPage() {
     setIsNextDisabled(!validateStep());
   }, [formData, isPaymentComplete, validateStep]);
 
+  const handleInstallShopify = async () => {
+    setIsShopifyInstalling(true);
+    try {
+      await new Promise((resolve) => setTimeout(resolve, 3000)); // Simulación de instalación
+      setIsShopifyInstalled(true);
+    } catch (error) {
+      console.error("Error installing Shopify", error);
+    } finally {
+      setIsShopifyInstalling(false);
+    }
+  };
+
   const handleNext = () => {
     if (validateStep()) {
       if (currentStep < steps.length) {
         setCurrentStep(currentStep + 1);
-      } else {
-        handleSubmit();
       }
     }
   };
@@ -231,7 +243,9 @@ export default function OnboardingPage() {
             handlePhoneChange={handlePhoneChange}
           />
         )}
-        {currentStep === 2 && <ServiceConnection />}
+        {currentStep === 2 && (
+          <ServiceConnection isShopifyInstalling={isShopifyInstalling} />
+        )}
         {currentStep === 3 && (
           <CompanyDetails formData={formData} handleChange={handleChange} />
         )}
@@ -246,6 +260,44 @@ export default function OnboardingPage() {
         )}
       </div>
 
+      {/* <div className={styles.buttonGroup}>
+        {currentStep > 1 && (
+          <button
+            className={clsx(styles.button, styles.prevBtn)}
+            onClick={() => setCurrentStep(currentStep - 1)}
+          >
+            Back
+          </button>
+        )}
+
+        {currentStep === 2 ? (
+          isShopifyInstalled ? (
+            <button
+              className={clsx(styles.button, styles.nextBtn)}
+              onClick={handleNext}
+              disabled={isNextDisabled}
+            >
+              Continue
+            </button>
+          ) : (
+            <button
+              className={clsx(styles.button, styles.installBtn)}
+              onClick={handleInstallShopify}
+              disabled={isShopifyInstalling}
+            >
+              Install Shopify
+            </button>
+          )
+        ) : (
+          <button
+            className={clsx(styles.button, styles.nextBtn)}
+            onClick={handleNext}
+            disabled={isNextDisabled}
+          >
+            Continue
+          </button>
+        )}
+      </div> */}
       <div className={styles.buttonGroup}>
         {currentStep > 1 && (
           <button
@@ -255,15 +307,43 @@ export default function OnboardingPage() {
             Back
           </button>
         )}
-        <button
-          className={clsx(styles.button, styles.nextBtn)}
-          onClick={handleNext}
-          disabled={isNextDisabled}
-        >
-          Continue
-        </button>
-      </div>
 
+        {currentStep === 2 ? (
+          isShopifyInstalled ? (
+            <button
+              className={clsx(styles.button, styles.nextBtn)}
+              onClick={handleNext}
+              disabled={isNextDisabled}
+            >
+              Continue
+            </button>
+          ) : (
+            <button
+              className={clsx(styles.button, styles.nextBtn)}
+              onClick={handleInstallShopify}
+              disabled={isShopifyInstalling}
+            >
+              Install
+            </button>
+          )
+        ) : currentStep === 4 ? (
+          <button
+            className={clsx(styles.button, styles.nextBtn)}
+            onClick={handleSubmit}
+            disabled={isNextDisabled}
+          >
+            Continue
+          </button>
+        ) : (
+          <button
+            className={clsx(styles.button, styles.nextBtn)}
+            onClick={handleNext}
+            disabled={isNextDisabled}
+          >
+            Continue
+          </button>
+        )}
+      </div>
       {paymentModalOpen && (
         <PaymentModal
           open={paymentModalOpen}

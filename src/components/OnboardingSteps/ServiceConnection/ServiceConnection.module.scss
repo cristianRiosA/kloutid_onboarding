@@ -17,3 +17,45 @@
   background: $plainWhite;
   margin-bottom: 60px;
 }
+
+.alertInformative {
+  border-radius: 4px;
+  background: $oldLace;
+  display: flex;
+  padding: 6px 16px;
+  align-items: flex-start;
+  margin-bottom: 55px;
+
+  flex-direction: row;
+
+  img {
+    padding-top: 7px;
+  }
+
+  div {
+    display: flex;
+    padding: 8px 0px;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 4px;
+    padding-left: 12px;
+  }
+
+  .alertTitle {
+    color: $violinBrown;
+    font-size: 16px;
+    font-style: normal;
+    font-weight: 500;
+    line-height: 24px;
+    letter-spacing: 0.15px;
+  }
+
+  .alertMessage {
+    color: $violinBrown;
+    font-size: 14px;
+    font-style: normal;
+    font-weight: 400;
+    line-height: 20.02px;
+    letter-spacing: 0.17px;
+  }
+}

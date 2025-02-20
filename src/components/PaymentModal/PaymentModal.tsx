@@ -132,16 +132,18 @@ const PaymentModal: React.FC<PaymentModalProps> = ({
           }
           error={!!errors.securityCode}
           helperText={errors.securityCode}
-          InputProps={{
-            endAdornment: (
-              <InputAdornment position="end">
-                <IconButton
-                  onClick={() => setShowSecurityCode(!showSecurityCode)}
-                >
-                  {showSecurityCode ? <VisibilityOff /> : <Visibility />}
-                </IconButton>
-              </InputAdornment>
-            ),
+          slotProps={{
+            input: {
+              endAdornment: (
+                <InputAdornment position="end">
+                  <IconButton
+                    onClick={() => setShowSecurityCode(!showSecurityCode)}
+                  >
+                    {showSecurityCode ? <VisibilityOff /> : <Visibility />}
+                  </IconButton>
+                </InputAdornment>
+              ),
+            },
           }}
         />
       </DialogContent>
