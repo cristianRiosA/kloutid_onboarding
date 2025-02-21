@@ -1,4 +1,5 @@
-import React from "react";
+"use client";
+
 import { LazyImageRenderer } from "lazy-image-renderer";
 
 import styles from "./ServiceConnection.module.scss";

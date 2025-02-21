@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback } from "react";
 import clsx from "clsx";
 import StepTracker from "@/components/StepTracker";
 import { LazyImageRenderer } from "lazy-image-renderer";
@@ -10,28 +10,81 @@ import PersonalDetails from "@/components/OnboardingSteps/PersonalDetails/Person
 import ServiceConnection from "@/components/OnboardingSteps/ServiceConnection/ServiceConnection";
 import CompanyDetails from "@/components/OnboardingSteps/CompanyDetails/CompanyDetails";
 import PlanSelectionStep from "@/components/OnboardingSteps/PlanSelectionStep/PlanSelectionStep";
+import { updateMerchant } from "@/services/api";
+import { getAuthToken } from "@/services/firebase/auth";
+import ShopifyInstallModal from "@/components/ShopifyInstallModal/ShopifyInstallModal";
+import { useSearchParams } from "next/navigation";
+import { Alert, Snackbar } from "@mui/material";
 
 import styles from "./Onboarding.module.scss";
 
 export default function OnboardingPage() {
+  const searchParams = useSearchParams();
+  const shopParam = searchParams.get("shop");
+
   const [currentStep, setCurrentStep] = useState(1);
   const [isShopifyInstalling, setIsShopifyInstalling] = useState(false);
+  const [modalOpen, setModalOpen] = useState(false);
   const [isShopifyInstalled, setIsShopifyInstalled] = useState(false);
   const [paymentModalOpen, setPaymentModalOpen] = useState(false);
   const [isPaymentComplete, setIsPaymentComplete] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [isNextDisabled, setIsNextDisabled] = useState(true);
+  const [merchantError, setMerchantError] = useState<string | null>(null);
+  const [shopDomain, setShopDomain] = useState<string | null>(() =>
+    typeof window !== "undefined" ? localStorage.getItem("shopDomain") : null
+  );
+
   const [formData, setFormData] = useState<FormData>({
     firstName: "",
     lastName: "",
     email: "",
-    phone: "",
+    phoneCountryCode: "",
+    phoneNumber: "",
     companyName: "",
     companyWebsite: "",
     companySize: "",
     selectedPlan: "",
     creditCards: {},
   });
+
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      const storedShopDomain = localStorage.getItem("shopDomain");
+      setShopDomain(storedShopDomain);
+    }
+  }, []);
+
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      if (shopParam) {
+        if (shopDomain && shopDomain !== shopParam) {
+          setShopDomain(null);
+          localStorage.removeItem("shopDomain");
+          setIsShopifyInstalled(false);
+          setCurrentStep(1);
+        } else {
+          setShopDomain(shopParam);
+          localStorage.setItem("shopDomain", shopParam);
+          setIsShopifyInstalled(true);
+          setCurrentStep(2);
+        }
+      } else if (shopDomain) {
+        setIsShopifyInstalled(true);
+        setCurrentStep(2);
+      } else {
+        setIsShopifyInstalled(false);
+        setCurrentStep(1);
+      }
+    }
+  }, [shopParam, shopDomain]);
+
+  useEffect(() => {
+    if (currentStep === 3 && typeof window !== "undefined") {
+      setShopDomain(null);
+      localStorage.removeItem("shopDomain");
+    }
+  }, [currentStep]);
 
   const steps = [
     { text: "Tell us about yourself", icon: 1 },
@@ -50,7 +103,7 @@ export default function OnboardingPage() {
         newErrors.lastName = "Last name is required.";
       if (!/^[\w-.]+@([\w-]+\.)+[\w-]{2,4}$/.test(formData.email))
         newErrors.email = "Enter a valid email.";
-      if (!formData.phone || formData.phone.length < 10)
+      if (!formData.phoneNumber || formData.phoneNumber.length < 10)
         newErrors.phone = "Enter a valid phone number (min 10 digits).";
     }
 
@@ -82,20 +135,46 @@ export default function OnboardingPage() {
     setIsNextDisabled(!validateStep());
   }, [formData, isPaymentComplete, validateStep]);
 
-  const handleInstallShopify = async () => {
+  const handleInstallShopify = async (shopDomain: string) => {
     setIsShopifyInstalling(true);
+    setModalOpen(false);
+
     try {
-      await new Promise((resolve) => setTimeout(resolve, 3000)); // Simulación de instalación
-      setIsShopifyInstalled(true);
+      const shopifyAuthUrl = process.env.NEXT_PUBLIC_SHOPIFY_AUTH_URL;
+      window.location.href = `${shopifyAuthUrl}?shop=${shopDomain}`;
     } catch (error) {
-      console.error("Error installing Shopify", error);
+      console.error("Error installing Shopify app", error);
     } finally {
       setIsShopifyInstalling(false);
+      setIsShopifyInstalled(true);
     }
   };
 
-  const handleNext = () => {
+  const handleNext = async () => {
     if (validateStep()) {
+      if (currentStep === 1) {
+        try {
+          const authToken = await getAuthToken();
+          if (!authToken) {
+            throw new Error("Failed to retrieve authentication token.");
+          }
+
+          await updateMerchant(
+            formData.firstName,
+            formData.lastName,
+            formData.phoneCountryCode,
+            formData.phoneNumber,
+            authToken
+          );
+        } catch (error) {
+          console.error("🔴 Error updating merchant:", error);
+          setMerchantError(
+            "Something went wrong while sending the information. Please try again."
+          );
+          return;
+        }
+      }
+
       if (currentStep < steps.length) {
         setCurrentStep(currentStep + 1);
       }
@@ -112,33 +191,6 @@ export default function OnboardingPage() {
     setFormData((prevFormData) => ({
       ...prevFormData,
       [e.target.name]: e.target.value,
-    }));
-  };
-
-  const handlePhoneChange = (value: string | undefined) => {
-    if (!value) {
-      setFormData((prevFormData) => ({
-        ...prevFormData,
-        phone: "",
-      }));
-      return;
-    }
-
-    const numericValue = value.replace(/\D/g, "");
-    const match = value.match(/^(\+\d{1,4})\s?/);
-    const countryCode = match ? match[1] : "";
-
-    const nationalNumber = numericValue.replace(
-      countryCode.replace(/\D/g, ""),
-      ""
-    );
-
-    const truncatedNationalNumber = nationalNumber.slice(0, 10);
-    const formattedPhone = countryCode + " " + truncatedNationalNumber;
-
-    setFormData((prevFormData) => ({
-      ...prevFormData,
-      phone: formattedPhone.trim(),
     }));
   };
 
@@ -165,28 +217,29 @@ export default function OnboardingPage() {
   };
 
   const handleSubmit = async () => {
-    console.log("Submitting Data:", formData);
     try {
-      const response = await fetch("https://api.example.com/onboarding", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(formData),
-      });
-      if (response.ok) {
-        alert("Onboarding completed successfully!");
-        setFormData({
-          firstName: "",
-          lastName: "",
-          email: "",
-          phone: "",
-          companyName: "",
-          companyWebsite: "",
-          companySize: "",
-          selectedPlan: "",
-          creditCards: {},
-        });
-        setCurrentStep(1);
-      }
+      //TODO: temporarily commented
+      // const response = await fetch("https://api.example.com/onboarding", {
+      //   method: "POST",
+      //   headers: { "Content-Type": "application/json" },
+      //   body: JSON.stringify(formData),
+      // });
+      // if (response.ok) {
+      //   alert("Onboarding completed successfully!");
+      //   setFormData({
+      //     firstName: "",
+      //     lastName: "",
+      //     email: "",
+      //     phoneNumber: "",
+      //     phoneCountryCode: "",
+      //     companyName: "",
+      //     companyWebsite: "",
+      //     companySize: "",
+      //     selectedPlan: "",
+      //     creditCards: {},
+      //   });
+      //   setCurrentStep(1);
+      // }
     } catch (error) {
       console.error("Error submitting form", error);
     }
@@ -239,8 +292,19 @@ export default function OnboardingPage() {
         {currentStep === 1 && (
           <PersonalDetails
             formData={formData}
-            handleChange={handleChange}
-            handlePhoneChange={handlePhoneChange}
+            handleChange={(e) =>
+              setFormData((prev) => ({
+                ...prev,
+                [e.target.name]: e.target.value,
+              }))
+            }
+            handlePhoneChange={(phoneCountryCode, phoneNumber) =>
+              setFormData((prev) => ({
+                ...prev,
+                phoneCountryCode,
+                phoneNumber,
+              }))
+            }
           />
         )}
         {currentStep === 2 && (
@@ -259,45 +323,6 @@ export default function OnboardingPage() {
           <p className={styles.errorText}>{errors.selectedPlan}</p>
         )}
       </div>
-
-      {/* <div className={styles.buttonGroup}>
-        {currentStep > 1 && (
-          <button
-            className={clsx(styles.button, styles.prevBtn)}
-            onClick={() => setCurrentStep(currentStep - 1)}
-          >
-            Back
-          </button>
-        )}
-
-        {currentStep === 2 ? (
-          isShopifyInstalled ? (
-            <button
-              className={clsx(styles.button, styles.nextBtn)}
-              onClick={handleNext}
-              disabled={isNextDisabled}
-            >
-              Continue
-            </button>
-          ) : (
-            <button
-              className={clsx(styles.button, styles.installBtn)}
-              onClick={handleInstallShopify}
-              disabled={isShopifyInstalling}
-            >
-              Install Shopify
-            </button>
-          )
-        ) : (
-          <button
-            className={clsx(styles.button, styles.nextBtn)}
-            onClick={handleNext}
-            disabled={isNextDisabled}
-          >
-            Continue
-          </button>
-        )}
-      </div> */}
       <div className={styles.buttonGroup}>
         {currentStep > 1 && (
           <button
@@ -320,10 +345,10 @@ export default function OnboardingPage() {
           ) : (
             <button
               className={clsx(styles.button, styles.nextBtn)}
-              onClick={handleInstallShopify}
-              disabled={isShopifyInstalling}
+              disabled={isShopifyInstalling || isShopifyInstalled}
+              onClick={() => setModalOpen(true)}
             >
-              Install
+              {isShopifyInstalling ? "Installing..." : "Install"}
             </button>
           )
         ) : currentStep === 4 ? (
@@ -343,12 +368,28 @@ export default function OnboardingPage() {
             Continue
           </button>
         )}
+        <Snackbar
+          open={!!merchantError}
+          autoHideDuration={6000}
+          onClose={() => setMerchantError(null)}
+        >
+          <Alert severity="error" onClose={() => setMerchantError(null)}>
+            {merchantError}
+          </Alert>
+        </Snackbar>
       </div>
       {paymentModalOpen && (
         <PaymentModal
           open={paymentModalOpen}
           onClose={() => setPaymentModalOpen(false)}
           onSubmit={handlePaymentSubmit}
+        />
+      )}
+      {modalOpen && (
+        <ShopifyInstallModal
+          open={modalOpen}
+          onClose={() => setModalOpen(false)}
+          onConfirm={handleInstallShopify}
         />
       )}
     </div>

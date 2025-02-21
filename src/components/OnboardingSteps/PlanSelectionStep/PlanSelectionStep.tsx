@@ -1,4 +1,3 @@
-import React from "react";
 import PlanSelection from "@/components/PlanSelection/PlanSelection";
 
 import styles from "./PlanSelectionStep.module.scss";

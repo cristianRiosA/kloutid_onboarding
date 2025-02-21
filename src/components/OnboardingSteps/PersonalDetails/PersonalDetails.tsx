@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import { TextField } from "@mui/material";
 import { MuiTelInput } from "mui-tel-input";
 import { FormData } from "@/interfaces/formData";
@@ -7,7 +7,7 @@ import styles from "./PersonalDetails.module.scss";
 interface PersonalDetailsProps {
   formData: FormData;
   handleChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
-  handlePhoneChange: (value: string) => void;
+  handlePhoneChange: (phoneCountryCode: string, phoneNumber: string) => void;
 }
 
 const PersonalDetails: React.FC<PersonalDetailsProps> = ({
@@ -35,7 +35,10 @@ const PersonalDetails: React.FC<PersonalDetailsProps> = ({
           errorMessage = "Enter a valid email address.";
         break;
       case "phone":
-        if (!value || value.length < 10)
+        if (
+          value.replace(/\D/g, "").length > 0 &&
+          value.replace(/\D/g, "").length < 10
+        )
           errorMessage = "Enter a valid phone number (min 10 digits).";
         break;
       default:
@@ -50,6 +53,37 @@ const PersonalDetails: React.FC<PersonalDetailsProps> = ({
 
   const handleBlur = (e: React.FocusEvent<HTMLInputElement>) => {
     validateField(e.target.name, e.target.value);
+  };
+
+  const handlePhone = (value: string) => {
+    if (!value) {
+      setErrors((prevErrors) => ({
+        ...prevErrors,
+        phone: "Phone is required.",
+      }));
+      return;
+    }
+
+    const numericValue = value.replace(/\D/g, "");
+    const match = value.match(/^(\+\d{1,4})\s?/);
+    const phoneCountryCode = match ? match[1] : "+1";
+    let phoneNumber = numericValue.replace(
+      phoneCountryCode.replace(/\D/g, ""),
+      ""
+    );
+
+    phoneNumber = phoneNumber.slice(0, 10);
+
+    if (phoneNumber.length > 0 && phoneNumber.length < 10) {
+      setErrors((prevErrors) => ({
+        ...prevErrors,
+        phone: "Enter a valid phone number (min 10 digits).",
+      }));
+    } else {
+      setErrors((prevErrors) => ({ ...prevErrors, phone: "" }));
+    }
+
+    handlePhoneChange(phoneCountryCode, phoneNumber);
   };
 
   return (
@@ -91,10 +125,12 @@ const PersonalDetails: React.FC<PersonalDetailsProps> = ({
         <MuiTelInput
           label="Phone"
           name="phone"
-          value={formData.phone}
-          onChange={handlePhoneChange}
+          value={`${formData.phoneCountryCode || "+1"} ${
+            formData.phoneNumber || ""
+          }`}
+          onChange={handlePhone}
           defaultCountry="US"
-          onBlur={() => validateField("phone", formData.phone)}
+          onBlur={() => validateField("phone", formData.phoneNumber || "")}
           error={!!errors.phone}
           helperText={errors.phone}
           required

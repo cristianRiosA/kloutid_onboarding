@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import { useState } from "react";
 import {
   TextField,
   Button,
@@ -13,8 +13,10 @@ import {
 } from "@mui/material";
 import { Visibility, VisibilityOff } from "@mui/icons-material";
 import { LazyImageRenderer } from "lazy-image-renderer";
+import { getUser, registerMerchant } from "@/services/api";
+import { registerWithEmail } from "@/services/firebase/auth";
+
 import styles from "./SignUp.module.scss";
-import { registerWithEmail } from "@/firebase/auth";
 
 interface SignUpProps {
   isLoading?: boolean;
@@ -54,16 +56,37 @@ const SignUp: React.FC<SignUpProps> = ({ error, toggleForm }) => {
     }
 
     try {
-      await registerWithEmail(formValues.email, formValues.password);
+      const userCredential = await registerWithEmail(
+        formValues.email,
+        formValues.password
+      );
+
+      const authToken = await userCredential.user.getIdToken();
+
+      await registerMerchant(formValues.email, authToken);
+
+      const existingUser = await getUser(authToken);
+      if (existingUser) {
+        setIsSubmitting(false);
+      }
       toggleForm?.();
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (error: any) {
+      console.error("🔴 Error en handleSubmit:", error);
       setIsSubmitting(false);
-      setAuthError(
-        error.code === "auth/email-already-in-use"
-          ? "This email is already in use."
-          : "Failed to create account. Please try again."
-      );
+
+      let errorMessage = "Something went wrong. Please try again.";
+      if (error.code === "auth/email-already-in-use") {
+        errorMessage = "This email is already in use.";
+      } else if (error.code === "auth/invalid-email") {
+        errorMessage = "Invalid email format.";
+      } else if (error.code === "auth/weak-password") {
+        errorMessage = "Password should be at least 6 characters.";
+      } else if (error.code === "auth/network-request-failed") {
+        errorMessage = "Network error. Please check your connection.";
+      }
+
+      setAuthError(errorMessage);
     }
   };
 
@@ -71,13 +94,13 @@ const SignUp: React.FC<SignUpProps> = ({ error, toggleForm }) => {
     formValues.email.trim() !== "" &&
     formValues.password.trim() !== "" &&
     formValues.confirmPassword.trim() !== "" &&
+    formValues.password === formValues.confirmPassword &&
     formValues.terms;
 
   return (
     <div className={styles.container}>
       <form onSubmit={handleSubmit} className={styles.form}>
         <span className={styles.signUpTitle}>Sign up</span>
-
         <div className={styles.formContainer}>
           <TextField
             label="Email address"
@@ -90,7 +113,6 @@ const SignUp: React.FC<SignUpProps> = ({ error, toggleForm }) => {
             autoComplete="email"
             fullWidth
           />
-
           <TextField
             label="Password"
             name="password"
@@ -115,7 +137,6 @@ const SignUp: React.FC<SignUpProps> = ({ error, toggleForm }) => {
               },
             }}
           />
-
           <TextField
             label="Confirm password"
             name="confirmPassword"
@@ -141,7 +162,6 @@ const SignUp: React.FC<SignUpProps> = ({ error, toggleForm }) => {
             }}
           />
         </div>
-
         <FormControlLabel
           className={styles.formControlLabel}
           control={
@@ -159,19 +179,23 @@ const SignUp: React.FC<SignUpProps> = ({ error, toggleForm }) => {
             </span>
           }
         />
-
         {authError && (
           <Alert severity="error" className={styles.error}>
             {authError}
           </Alert>
         )}
+        {formValues.password !== formValues.confirmPassword &&
+          formValues.confirmPassword.trim() !== "" && (
+            <Alert severity="error" className={styles.error}>
+              Passwords do not match.
+            </Alert>
+          )}
 
         {error && (
           <Alert severity="error" className={styles.error}>
             Something went wrong. Please try again.
           </Alert>
         )}
-
         <Button
           type="submit"
           variant="contained"
@@ -185,11 +209,9 @@ const SignUp: React.FC<SignUpProps> = ({ error, toggleForm }) => {
             <span>Register</span>
           )}
         </Button>
-
         <div className={styles.orText}>
           <span>OR</span>
         </div>
-
         <Button
           variant="outlined"
           className={styles.googleButton}
@@ -203,7 +225,6 @@ const SignUp: React.FC<SignUpProps> = ({ error, toggleForm }) => {
           />
           <span>Access with Google</span>
         </Button>
-
         <span className={styles.loginText}>
           Already have an account?{" "}
           <a

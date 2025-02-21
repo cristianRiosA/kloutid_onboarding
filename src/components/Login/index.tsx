@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import { useState } from "react";
 import {
   TextField,
   Button,
@@ -10,7 +10,10 @@ import {
   Alert,
 } from "@mui/material";
 import { Visibility, VisibilityOff } from "@mui/icons-material";
-import { loginWithEmail, loginWithGoogle } from "@/firebase/auth";
+import {
+  loginWithEmail,
+  // loginWithGoogle
+} from "@/services/firebase/auth";
 import { LazyImageRenderer } from "lazy-image-renderer";
 import { useRouter } from "next/navigation";
 
@@ -139,7 +142,8 @@ const Login: React.FC<LoginProps> = ({ error, toggleForm }) => {
         <Button
           variant="outlined"
           className={styles.googleButton}
-          onClick={loginWithGoogle}
+          //TODO: temporarily commented
+          // onClick={loginWithGoogle}
           disabled={isSubmitting}
         >
           <LazyImageRenderer
