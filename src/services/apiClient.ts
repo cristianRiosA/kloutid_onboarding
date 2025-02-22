@@ -1,8 +1,9 @@
 import axios from "axios";
 import { getAuthToken } from "@/services/firebase/auth";
+import { api } from "@/environment";
 
-export const API_URL = process.env.NEXT_PUBLIC_API_URL?.replace(/\/+$/, "");
-console.log("🔹 API_URL Configurada:", API_URL);
+export const API_URL = api.core?.replace(/\/+$/, "");
+
 const apiClient = axios.create({
   baseURL: API_URL,
   headers: {

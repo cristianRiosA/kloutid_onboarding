@@ -1,4 +1,5 @@
 @use "../../../styles/variables" as *;
+@use "../../../styles/mixins" as *;
 
 .informativeText {
   display: flex;
@@ -6,6 +7,7 @@
   text-align: justify;
   margin-top: 55px;
   margin-bottom: 55px;
+  @include no-select();
 }
 
 .formGrid {

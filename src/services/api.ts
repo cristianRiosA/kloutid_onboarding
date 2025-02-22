@@ -50,3 +50,33 @@ export const getUser = async (authToken: string) => {
   });
   return response.data;
 };
+
+export const existDomain = async (domain: string, authToken: string) => {
+  const response = await apiClient.get(
+    `/merchants/exist-domain?domain=${domain}`,
+    {
+      headers: {
+        Authorization: `Bearer ${authToken}`,
+      },
+    }
+  );
+  return response.data;
+};
+
+export const updateMerchantDataCompany = async (
+  name: string,
+  website: string,
+  companySize: string,
+  authToken: string
+) => {
+  const response = await apiClient.post(
+    "/merchants/upsert",
+    { name, website, companySize },
+    {
+      headers: {
+        Authorization: `Bearer ${authToken}`,
+      },
+    }
+  );
+  return response.data;
+};

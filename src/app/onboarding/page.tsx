@@ -9,12 +9,17 @@ import PaymentModal from "@/components/PaymentModal/PaymentModal";
 import PersonalDetails from "@/components/OnboardingSteps/PersonalDetails/PersonalDetails";
 import ServiceConnection from "@/components/OnboardingSteps/ServiceConnection/ServiceConnection";
 import CompanyDetails from "@/components/OnboardingSteps/CompanyDetails/CompanyDetails";
-import PlanSelectionStep from "@/components/OnboardingSteps/PlanSelectionStep/PlanSelectionStep";
-import { updateMerchant } from "@/services/api";
+//import PlanSelectionStep from "@/components/OnboardingSteps/PlanSelectionStep/PlanSelectionStep";
+import {
+  existDomain,
+  updateMerchant,
+  updateMerchantDataCompany,
+} from "@/services/api";
 import { getAuthToken } from "@/services/firebase/auth";
 import ShopifyInstallModal from "@/components/ShopifyInstallModal/ShopifyInstallModal";
 import { useSearchParams } from "next/navigation";
-import { Alert, Snackbar } from "@mui/material";
+import { Alert, CircularProgress, Snackbar } from "@mui/material";
+import { ShopifyAuthUrl } from "@/environment";
 
 import styles from "./Onboarding.module.scss";
 
@@ -31,6 +36,7 @@ export default function OnboardingPage() {
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [isNextDisabled, setIsNextDisabled] = useState(true);
   const [merchantError, setMerchantError] = useState<string | null>(null);
+  const [isNextLoading, setIsNextLoading] = useState(false);
   const [shopDomain, setShopDomain] = useState<string | null>(() =>
     typeof window !== "undefined" ? localStorage.getItem("shopDomain") : null
   );
@@ -77,7 +83,8 @@ export default function OnboardingPage() {
         setCurrentStep(1);
       }
     }
-  }, [shopParam, shopDomain]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   useEffect(() => {
     if (currentStep === 3 && typeof window !== "undefined") {
@@ -140,18 +147,38 @@ export default function OnboardingPage() {
     setModalOpen(false);
 
     try {
-      const shopifyAuthUrl = process.env.NEXT_PUBLIC_SHOPIFY_AUTH_URL;
-      window.location.href = `${shopifyAuthUrl}?shop=${shopDomain}`;
+      const authToken = await getAuthToken();
+      if (!authToken) {
+        throw new Error("Failed to retrieve authentication token.");
+      }
+      const domainExists = await existDomain(shopDomain, authToken);
+      if (!domainExists) {
+        setMerchantError(
+          "The provided domain does not exist on Shopify. Please check and try again."
+        );
+
+        setModalOpen(true);
+        return;
+      }
+
+      if (domainExists) {
+        const shopifyAuthUrl = ShopifyAuthUrl;
+        window.location.href = `${shopifyAuthUrl}?shop=${shopDomain}`;
+      }
     } catch (error) {
-      console.error("Error installing Shopify app", error);
+      console.error("🔴 Error installing Shopify app:", error);
+      setMerchantError(
+        "Something went wrong while verifying the domain. Please try again."
+      );
+      setModalOpen(true);
     } finally {
       setIsShopifyInstalling(false);
-      setIsShopifyInstalled(true);
     }
   };
 
   const handleNext = async () => {
     if (validateStep()) {
+      setIsNextLoading(true);
       if (currentStep === 1) {
         try {
           const authToken = await getAuthToken();
@@ -174,10 +201,32 @@ export default function OnboardingPage() {
           return;
         }
       }
+      if (currentStep === 3) {
+        try {
+          const authToken = await getAuthToken();
+          if (!authToken) {
+            throw new Error("Failed to retrieve authentication token.");
+          }
+
+          await updateMerchantDataCompany(
+            formData.companyName,
+            formData.companyWebsite,
+            formData.companySize,
+            authToken
+          );
+        } catch (error) {
+          console.error("🔴 Error updating merchant:", error);
+          setMerchantError(
+            "Something went wrong while sending the information. Please try again."
+          );
+          return;
+        }
+      }
 
       if (currentStep < steps.length) {
         setCurrentStep(currentStep + 1);
       }
+      setIsNextLoading(false);
     }
   };
 
@@ -194,14 +243,14 @@ export default function OnboardingPage() {
     }));
   };
 
-  const handlePlanSelection = (planId: string) => {
-    setFormData((prevFormData) => ({
-      ...prevFormData,
-      selectedPlan: planId,
-    }));
-    setErrors((prevErrors) => ({ ...prevErrors, selectedPlan: "" }));
-    setPaymentModalOpen(true);
-  };
+  // const handlePlanSelection = (planId: string) => {
+  //   setFormData((prevFormData) => ({
+  //     ...prevFormData,
+  //     selectedPlan: planId,
+  //   }));
+  //   setErrors((prevErrors) => ({ ...prevErrors, selectedPlan: "" }));
+  //   setPaymentModalOpen(true);
+  // };
 
   const handlePaymentSubmit = (cardNumber: string) => {
     const last4Digits = cardNumber ? cardNumber.slice(-4) : "";
@@ -314,10 +363,11 @@ export default function OnboardingPage() {
           <CompanyDetails formData={formData} handleChange={handleChange} />
         )}
         {currentStep === 4 && (
-          <PlanSelectionStep
-            formData={formData}
-            handlePlanSelection={handlePlanSelection}
-          />
+          // <PlanSelectionStep
+          //   formData={formData}
+          //   handlePlanSelection={handlePlanSelection}
+          // />
+          <span>cooming soon..</span>
         )}
         {errors.selectedPlan && (
           <p className={styles.errorText}>{errors.selectedPlan}</p>
@@ -340,7 +390,7 @@ export default function OnboardingPage() {
               onClick={handleNext}
               disabled={isNextDisabled}
             >
-              Continue
+              {isNextLoading ? <CircularProgress size={24} /> : "Continue"}
             </button>
           ) : (
             <button
@@ -357,7 +407,7 @@ export default function OnboardingPage() {
             onClick={handleSubmit}
             disabled={isNextDisabled}
           >
-            Continue
+            {isNextLoading ? <CircularProgress size={24} /> : "Continue"}
           </button>
         ) : (
           <button
@@ -365,7 +415,7 @@ export default function OnboardingPage() {
             onClick={handleNext}
             disabled={isNextDisabled}
           >
-            Continue
+            {isNextLoading ? <CircularProgress size={24} /> : "Continue"}
           </button>
         )}
         <Snackbar
