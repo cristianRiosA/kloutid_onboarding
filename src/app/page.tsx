@@ -30,16 +30,6 @@ export default function Home() {
           >
             Get Started
           </button>
-          <button
-            onClick={() =>
-              handleButtonClick(
-                "https://kloutidonboarding.vercel.app/onboarding"
-              )
-            }
-            className={styles.button}
-          >
-            onboarding
-          </button>
         </div>
       </main>
 
